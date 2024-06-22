@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            padding: 20px;
+            margin: 0;
+        }
+        a {
+            display: inline-block;
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        a:hover {
+            background-color: #45a049;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: white;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+        }
+        li img {
+            display: block;
+            margin: 0 auto 10px;
+            border-radius: 5px;
+        }
+        li p {
+            margin: 10px 0;
+            text-align: center;
+        }
+        p.no-result {
+            text-align: center;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>查询结果</h1>
+    <a href="javascript:history.back()">返回</a>
+    <ul>
+    {% if books %}
+        {% for book in books %}
+            <li>
+                {% if book.cover %}
+                    <img src="data:image/jpeg;base64,{{ book.cover }}" alt="Book Cover" style="width:100px;height:auto;">
+                {% else %}
+                    <p>No cover available</p>
+                {% endif %}
+                <p>书名: {{ book.title }}</p>
+                <p>作者: {{ book.author }}</p>
+                <p>馆藏总数: {{ book.books_total }}</p>
+                <p>可借总数: {{ book.books_available }}</p>
+                <p>被借阅次数: {{ book.borrow_times }}</p>
+            </li>
+        {% endfor %}
+    {% else %}
+        <p>没有结果</p>
+    {% endif %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>读者页面</title>
+    <style>
+        .container {
+            width: 50%;
+            margin: 0 auto;
+            text-align: center;
+            padding: 50px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group label {
+            display: block;
+            font-size: 18px;
+        }
+        .input-group input {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; 
+            background-color: rgb(0,0,0); 
+            background-color: rgba(0,0,0,0.4); 
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .date-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #f1f1f1;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="container">
+            <h2>您好！亲爱的读者 {{ user_id }} {{ name }}</h2>
+            <button type="button" class="button" onclick="showModal(1)">借书</button>
+            <button type="button" class="button" onclick="showModal(2)">还书</button>
+            <a href="{% url 'borrow_search' user_id=user_id %}">
+                <button type="button" class="button">借阅记录查询</button>
+            </a>
+            <a href="{% url 'reserve_search' user_id=user_id %}">
+                <button type="button" class="button">预约记录查询</button>
+            </a>
+            <button type="button" class="button" onclick="showModal(3)">预约</button>
+            <button type="button" class="button" onclick="showModal(4)">取消预约</button>
+        </div>
+
+        <div id="borrowModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal(1)">&times;</span>
+                <h2>借书</h2>
+                <div class="input-group">
+                    <label for="bookTitleBorrow">请输入要借的书名</label>
+                    <input type="text" id="bookTitleBorrow" name="bookTitleBorrow">
+                </div>
+                <div class="input-group">
+                    <label for="bookAuthorBorrow">请输入要借书的作者</label>
+                    <input type="text" id="bookAuthorBorrow" name="bookAuthorBorrow">
+                </div>
+                <button type="button" class="button" onclick="borrow_book('{{ user_id }}')">提交</button>
+                <button type="button" class="button" onclick="closeModal(1)">返回</button>
+            </div>
+        </div>
+
+        <div id="returnModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal(2)">&times;</span>
+                <h2>还书</h2>
+                <div class="input-group">
+                    <label for="bookTitleReturn">请输入要还的书名</label>
+                    <input type="text" id="bookTitleReturn" name="bookTitleReturn">
+                </div>
+                <div class="input-group">
+                    <label for="bookAuthorReturn">请输入要还的书的作者</label>
+                    <input type="text" id="bookAuthorReturn" name="bookAuthorReturn">
+                </div>
+                <button type="button" class="button" onclick="return_book('{{ user_id }}')">提交</button>
+                <button type="button" class="button" onclick="closeModal(2)">返回</button>
+            </div>
+        </div>
+
+        <div id="reserveModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal(3)">&times;</span>
+                <h2>预约</h2>
+                <div class="input-group">
+                    <label for="bookTitleReserve">请输入要预约的书名</label>
+                    <input type="text" id="bookTitleReserve" name="bookTitleReserve">
+                </div>
+                <div class="input-group">
+                    <label for="bookAuthorReserve">请输入要预约的书的作者</label>
+                    <input type="text" id="bookAuthorReserve" name="bookAuthorReserve">
+                </div>
+                <button type="button" class="button" onclick="reserve_book('{{ user_id }}')">提交</button>
+                <button type="button" class="button" onclick="closeModal(3)">返回</button>
+            </div>
+        </div>
+
+        <div id="deleteReserveModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal(4)">&times;</span>
+                <h2>取消预约</h2>
+                <div class="input-group">
+                    <label for="bookTitleDelete">请输入要取消的书名</label>
+                    <input type="text" id="bookTitleDelete" name="bookTitleDelete">
+                </div>
+                <div class="input-group">
+                    <label for="bookAuthorDelete">请输入要取消的书的作者</label>
+                    <input type="text" id="bookAuthorDelete" name="bookAuthorDelete">
+                </div>
+                <button type="button" class="button" onclick="delete_reserve('{{ user_id }}')">提交</button>
+                <button type="button" class="button" onclick="closeModal(4)">返回</button>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        function showModal(i) {
+            if(i == 1) document.getElementById('borrowModal').style.display = 'block';
+            if(i == 2) document.getElementById('returnModal').style.display = 'block';
+            if(i == 3) document.getElementById('reserveModal').style.display = 'block';
+            if(i == 4) document.getElementById('deleteReserveModal').style.display = 'block';
+        }
+        function closeModal(i) {
+            if (i == 1) document.getElementById('borrowModal').style.display = 'none';
+            if (i == 2) document.getElementById('returnModal').style.display = 'none';
+            if (i == 3) document.getElementById('reserveModal').style.display = 'none';
+            if (i == 4) document.getElementById('deleteReserveModal').style.display = 'none';
+        }
+        function borrow_book(ID){
+            var title = document.getElementById('bookTitleBorrow').value;
+            var author = document.getElementById('bookAuthorBorrow').value;
+
+            var formData = new FormData();
+            formData.append("title", title);
+            formData.append("author", author);
+            formData.append("ID", ID);
+
+            fetch("{% url 'borrow_book' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    alert("书籍借阅成功！");
+                } else {
+                    alert(data.message);
+                }
+                closeModal(1);
+            }); 
+        }      
+        function return_book(ID){
+            
+            var title = document.getElementById('bookTitleReturn').value;
+            var author = document.getElementById('bookAuthorReturn').value;
+
+            var formData = new FormData();
+            formData.append("title", title);
+            formData.append("author", author);
+            formData.append("ID", ID);
+
+            fetch("{% url 'return_book' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    alert("还书成功！");
+                } else {
+                    alert(data.message);
+                }
+                closeModal(2);
+            }); 
+        }
+        function reserve_book(ID){
+            var title = document.getElementById('bookTitleReserve').value;
+            var author = document.getElementById('bookAuthorReserve').value;
+
+            var formData = new FormData();
+            formData.append("title", title);
+            formData.append("author", author);
+            formData.append("ID", ID);
+
+            fetch("{% url 'reserve_book' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    alert("预约成功！");
+                } else {
+                    alert(data.message);
+                }
+                closeModal(3);
+            }); 
+        }
+        function delete_reserve(ID){
+            var title = document.getElementById('bookTitleDelete').value;
+            var author = document.getElementById('bookAuthorDelete').value;
+
+            var formData = new FormData();
+            formData.append("title", title);
+            formData.append("author", author);
+            formData.append("ID", ID);
+
+            fetch("{% url 'delete_reserve' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    alert("取消预约成功！");
+                } else {
+                    alert(data.message);
+                }
+                closeModal(4);
+            }); 
+        }
+    </script>
+</body>
+</html>

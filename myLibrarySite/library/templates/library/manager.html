@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>管理员页面</title>
+    <style>
+        .container {
+            width: 50%;
+            margin: 0 auto;
+            text-align: center;
+            padding: 50px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group label {
+            display: block;
+            font-size: 18px;
+        }
+        .input-group input {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; 
+            background-color: rgb(0,0,0); 
+            background-color: rgba(0,0,0,0.4); 
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .date-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #f1f1f1;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="container">
+            <h2>您好！亲爱的管理员 {{ user_id }} {{ name }}</h2>
+            <button type="button" class="button" onclick="showModal(1)">添加书籍(新书)</button>
+            <button type="button" class="button" onclick="showModal(2)">添加书籍(已有)</button>
+            <button type="button" class="button" onclick="showModal(3)">删除书籍(几本)</button>
+            <button type="button" class="button" onclick="showModal(4)">删除书籍(一种)</button>
+            <button type="button" class="button" onclick="showModal(5)">修改书籍</button>
+        </div>
+        <div id="addBookNewModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal(1)">&times;</span>
+                <h2>添加新书</h2>
+                <div class="input-group">
+                    <label for="bookTitle">请输入要添加的书名</label>
+                    <input type="text" id="bookTitle" name="bookTitle" required>
+                </div>
+                <div class="input-group">
+                    <label for="bookAuthor">请输入要添加书的作者</label>
+                    <input type="text" id="bookAuthor" name="bookAuthor" required>
+                </div>
+                <div class="input-group">
+                    <label for="bookCover">请输入封面</label>
+                    <input type="file" id="bookCover" name="bookCover" accept="image/*">
+                </div>
+                <div class="input-group">
+                    <label for="bookNum">请输入要添加的书的数量</label>
+                    <input type="number" id="bookNum" name="bookNum" min="1">
+                </div>
+                <button type="button" class="button" onclick="addBookNew()">提交</button>
+                <button type="button" class="button" onclick="closeModal(1)">返回</button>
+            </div>
+        </div>
+
+        <div id="addBookOldModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal(2)">&times;</span>
+                <h2>添加已有书籍</h2>
+                <div class="input-group">
+                    <label for="bookTitleOld">请输入要添加的书名</label>
+                    <input type="text" id="bookTitleOld" name="bookTitleOld" required>
+                </div>
+                <div class="input-group">
+                    <label for="bookAuthorOld">请输入要添加书的作者</label>
+                    <input type="text" id="bookAuthorOld" name="bookAuthorOld" required>
+                </div>
+                <div class="input-group">
+                    <label for="bookNumOld">请输入要添加的书的数量</label>
+                    <input type="number" id="bookNumOld" name="bookNumOld" min="1">
+                </div>
+                <button type="button" class="button" onclick="addBookOld()">提交</button>
+                <button type="button" class="button" onclick="closeModal(2)">返回</button>
+            </div>
+        </div>
+
+        <div id="deleteBookSomeModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal(3)">&times;</span>
+                <h2>删除一些书</h2>
+                <div class="input-group">
+                    <label for="bookTitleSome">请输入要删除的书名</label>
+                    <input type="text" id="bookTitleSome" name="bookTitleSome" required>
+                </div>
+                <div class="input-group">
+                    <label for="bookAuthorSome">请输入要删除书的作者</label>
+                    <input type="text" id="bookAuthorSome" name="bookAuthorSome" required>
+                </div>
+                <div class="input-group">
+                    <label for="bookNumSome">请输入要删除的书的数量</label>
+                    <input type="number" id="bookNumSome" name="bookNumSome" min="1">
+                </div>
+                <button type="button" class="button" onclick="deleteBookSome()">提交</button>
+                <button type="button" class="button" onclick="closeModal(3)">返回</button>
+            </div>
+        </div>
+
+        <div id="deleteBookAllModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal(4)">&times;</span>
+                <h2>删除一种书</h2>
+                <div class="input-group">
+                    <label for="bookTitleAll">请输入要删除的书名</label>
+                    <input type="text" id="bookTitleAll" name="bookTitleAll" required>
+                </div>
+                <div class="input-group">
+                    <label for="bookAuthorAll">请输入要删除书的作者</label>
+                    <input type="text" id="bookAuthorAll" name="bookAuthorAll" required>
+                </div>
+                <button type="button" class="button" onclick="deleteBookAll()">提交</button>
+                <button type="button" class="button" onclick="closeModal(4)">返回</button>
+            </div>
+        </div>
+
+        <div id="updateBookModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal(5)">&times;</span>
+                <h2>书籍修改</h2>
+                <div class="input-group">
+                    <label for="bookOriginTitle">请输入要修改的书名</label>
+                    <input type="text" id="bookOriginTitle" name="bookOriginTitle" required>
+                </div>
+                <div class="input-group">
+                    <label for="bookOriginAuthor">请输入要修改书的作者</label>
+                    <input type="text" id="bookOriginAuthor" name="bookOriginAuthor" required>
+                </div>
+                <div class="input-group">
+                    <label for="bookNewTitle">请输入新的书名(不变则留空)</label>
+                    <input type="text" id="bookNewTitle" name="bookNewTitle">
+                </div>
+                <div class="input-group">
+                    <label for="bookNewAuthor">请输入新的书的作者(不变则留空)</label>
+                    <input type="text" id="bookNewAuthor" name="bookNewAuthor">
+                </div>
+                <div class="input-group">
+                    <label for="bookNewCover">请输入新的封面(不变则留空)</label>
+                    <input type="file" id="bookNewCover" name="bookNewCover" accept="image/*">
+                </div>
+                <button type="button" class="button" onclick="updateBook()">提交</button>
+                <button type="button" class="button" onclick="closeModal(5)">返回</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        function showModal(i) {
+            if(i == 1) document.getElementById('addBookNewModal').style.display = "block";
+            else if (i == 2) document.getElementById('addBookOldModal').style.display = "block";
+            else if (i == 3) document.getElementById('deleteBookSomeModal').style.display = "block";
+            else if (i == 4) document.getElementById('deleteBookAllModal').style.display = "block";
+            else if (i == 5) document.getElementById('updateBookModal').style.display = "block";
+        }
+
+        function closeModal(i) {
+            
+            if(i == 1) document.getElementById('addBookNewModal').style.display = "none";
+            else if (i == 2) document.getElementById('addBookOldModal').style.display = "none";
+            else if (i == 3) document.getElementById('deleteBookSomeModal').style.display = "none";
+            else if (i == 4) document.getElementById('deleteBookAllModal').style.display = "none";
+            else if (i == 5) document.getElementById('updateBookModal').style.display = "none";
+        }
+        
+        function addBookNew() {
+            var title = document.getElementById('bookTitle').value;
+            var author = document.getElementById('bookAuthor').value;
+            var cover = document.getElementById('bookCover').files[0];
+            var num = document.getElementById('bookNum').value;
+            if(title && author){
+                var formData = new FormData();
+                formData.append("title", title);
+                formData.append("author", author);
+                formData.append("cover", cover);
+                formData.append("num", num);
+
+                fetch("{% url 'add_book_new' %}", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        alert("书籍添加成功！");
+                    } else {
+                        alert(data.message);
+                    }
+                    closeModal(1);
+                });
+            }
+            else alert("请输入书名和作者名");
+            
+        }
+        
+        function addBookOld() {
+            var title = document.getElementById('bookTitleOld').value;
+            var author = document.getElementById('bookAuthorOld').value;
+            var num = document.getElementById('bookNumOld').value;
+
+            var formData = new FormData();
+            formData.append("title", title);
+            formData.append("author", author);
+            formData.append("num", num);
+
+            fetch("{% url 'add_book_old' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    alert("书籍添加成功！");
+                } else {
+                    alert(data.message);
+                }
+                closeModal(2);
+            });    
+        }
+        
+        function deleteBookSome() {
+            // 删除书籍功能代码
+            var title = document.getElementById('bookTitleSome').value;
+            var author = document.getElementById('bookAuthorSome').value;
+            var num = document.getElementById('bookNumSome').value;
+
+            var formData = new FormData();
+            formData.append("title", title);
+            formData.append("author", author);
+            formData.append("num", num);
+
+            fetch("{% url 'delete_book_some' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    alert("书籍删除成功！");
+                } else {
+                    alert(data.message);
+                }
+                closeModal(3);
+            }); 
+        }
+        
+        function deleteBookAll() {
+            var title = document.getElementById('bookTitleAll').value;
+            var author = document.getElementById('bookAuthorAll').value;
+
+            var formData = new FormData();
+            formData.append("title", title);
+            formData.append("author", author);
+
+            fetch("{% url 'delete_book_all' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    alert("书籍删除成功！");
+                } else {
+                    alert(data.message);
+                }
+                closeModal(4);
+            }); 
+        }
+        
+        function updateBook() {
+            // 修改书籍功能代码
+            var OriginTitle = document.getElementById('bookOriginTitle').value;
+            var OriginAuthor = document.getElementById('bookOriginAuthor').value;
+            var NewTitle = document.getElementById('bookNewTitle').value;
+            var NewAuthor = document.getElementById('bookNewAuthor').value;
+            var NewCover = document.getElementById('bookNewCover').files[0];
+            var formData = new FormData();
+            formData.append("OriginTitle", OriginTitle);
+            formData.append("OriginAuthor", OriginAuthor);
+            formData.append("NewTitle", NewTitle);
+            formData.append("NewAuthor", NewAuthor);
+            formData.append("NewCover", NewCover);
+
+            fetch("{% url 'update_book' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    alert("书籍修改成功！");
+                } else {
+                    alert(data.message);
+                }
+                closeModal(5);
+            });
+        }
+    </script>
+</body>
+</html>

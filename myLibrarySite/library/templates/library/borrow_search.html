@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            padding: 20px;
+            margin: 0;
+        }
+        a {
+            display: inline-block;
+            margin: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        a:hover {
+            background-color: #45a049;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: white;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+        }
+        li img {
+            display: block;
+            margin: 0 auto 10px;
+            border-radius: 5px;
+        }
+        li p {
+            margin: 10px 0;
+            text-align: center;
+        }
+        p.no-result {
+            text-align: center;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>查询结果</h1>
+    <a href="javascript:history.back()">返回</a>
+    <ul>
+    {% if borrows %}
+        {% for borrow in borrows %}
+            <li>
+                <p>书名: {{ borrow.title }}</p>
+                <p>作者: {{ borrow.author }}</p>
+                <p>借阅时间: {{ borrow.borrow_date }}</p>
+                {% if borrow.return_date %}
+                    <p>归还时间: {{ borrow.return_date }}</p>
+                {% else %}
+                    <p>尚未归还</p>
+                {% endif %}
+                <p>归还最晚期限: {{ borrow.return_ddl }}</p>
+            </li>
+        {% endfor %}
+    {% else %}
+        <p>没有结果</p>
+    {% endif %}
+    </ul>
+</body>
+</html>

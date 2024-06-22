@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Library Management System</title>
+    <style>
+
+        .container {
+            width: 50%;
+            margin: 0 auto;
+            text-align: center;
+            padding: 50px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        .input-group {
+            margin: 10px 0;
+        }
+        .input-group label {
+            display: block;
+            font-size: 18px;
+        }
+        .input-group input {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; 
+            background-color: rgb(0,0,0); 
+            background-color: rgba(0,0,0,0.4); 
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 10px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .date-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #f1f1f1;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>欢迎使用我的图书管理系统！</h1>
+        <div class="date-container" id="date"></div>
+        <a href="{% url 'login_judge' %}" class="button">登录</a>
+        <button type="button" class="button" onclick="showModal(1)">修改日期</button>
+        <button type="button" class="button" onclick="showModal(2)">查询</button>
+    </div>
+
+
+    <div id="dateSimulateModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal(1)">&times;</span>
+            <h2>要快进几天呢?</h2>
+            <div class="input-group">
+                <label for="dateInput">请输入要添加的日期</label>
+                <input type="number" id="dateInput" name="dateInput" min="1">
+            </div>
+            <button type="button" class="button" onclick="DateUpdate()">提交</button>
+            <button type="button" class="button" onclick="closeModal(1)">返回</button>
+        </div>
+    </div>
+
+    <div id="searchModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal(2)">&times;</span>
+            <h2>查询</h2>
+            <div class="input-group">
+                <label for="bookTitleSearch">请输入要查询的书名</label>
+                <input type="text" id="bookTitleSearch" name="bookTitleSearch">
+            </div>
+            <div class="input-group">
+                <label for="bookAuthorSearch">请输入要查询书的作者</label>
+                <input type="text" id="bookAuthorSearch" name="bookAuthorSearch">
+            </div>
+            <button type="button" class="button" onclick="search()">提交</button>
+            <button type="button" class="button" onclick="closeModal(2)">返回</button>
+        </div>
+    </div>
+
+
+    <script>
+        function showModal(i) {
+            if (i == 1) document.getElementById('dateSimulateModal').style.display = 'block';
+            else if(i == 2) document.getElementById('searchModal').style.display = 'block';
+        }
+        function closeModal(i) {
+            if(i == 1) document.getElementById('dateSimulateModal').style.display = 'none';
+            else if(i == 2) document.getElementById('searchModal').style.display = 'none';
+        }
+        function DateUpdate(){
+            var delta = document.getElementById('dateInput').value;
+            var formData = new FormData();
+            formData.append("delta", delta);
+
+            fetch("{% url 'date_update' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    alert("已经改变日期！");
+                } else {
+                    alert(data.message);
+                }
+                closeModal();
+            }); 
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+        const dateElement = document.getElementById('date');
+        const simulatedDate = "{{ simulated_date}}"; // 从服务器端获取模拟日期
+        dateElement.textContent = simulatedDate;
+    });
+        function search() {
+            var bookTitle = document.getElementById('bookTitleSearch').value;
+            var bookAuthor = document.getElementById('bookAuthorSearch').value;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', `/library/search/?book_name=${bookTitle}&author=${bookAuthor}`, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    window.location.href = `/library/search/?book_name=${bookTitle}&author=${bookAuthor}`;
+                }
+            };
+            xhr.send();
+        }
+    </script>
+</body>
+</html>
